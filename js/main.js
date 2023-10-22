@@ -6,6 +6,8 @@
  *  tree.
  */
 'use strict';
+const snapshotButton = document.querySelector('button#snapshot');
+const filterSelect = document.querySelector('select#filter');
 
 // Put variables in global scope to make them available to the browser console.
 const constraints = window.constraints = {
@@ -17,6 +19,20 @@ const constraints = window.constraints = {
 function handleSuccess(stream) {
   const video = document.querySelector('video');
   const videoTracks = stream.getVideoTracks();
+
+const canvas = window.canvas = document.querySelector('canvas');
+canvas.width = 480;
+canvas.height = 360;
+
+snapshotButton.onclick = function() {
+  canvas.className = filterSelect.value;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+};
+
+filterSelect.onchange = function() {
+  video.className = filterSelect.value;
+};
+  
   console.log('Got stream with constraints:', constraints);
   console.log(`Using video device: ${videoTracks[0].label}`);
   video.srcObject = stream;
@@ -72,6 +88,9 @@ async function init(e) {
   try {
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     handleSuccess(stream);
+      window.stream = stream; // make stream available to browser console
+  video.srcObject = stream;
+    
     e.target.disabled = true;
   } catch (e) {
     handleError(e);
